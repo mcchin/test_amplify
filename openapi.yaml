@@ -1,0 +1,2724 @@
+openapi: 3.0.0
+info:
+  title: Customer Portal
+  version: '1.0'
+servers:
+  - url: 'http://localhost:3000'
+paths:
+  /organizations:
+    post:
+      summary: Create organization
+      operationId: post-organizations
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - organization_id
+                    properties:
+                      organization_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - result
+          headers: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_Organization
+        - ViewType_Form
+        - Access_SuperUser
+      description: |-
+        Create new organization
+
+        As a super user, I want to create an organization for a company on the Cloud Ag platform, so that the company can store and manage all of their customer's (grower's) information and their fields on the Cloud Ag platform
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_name:
+                  type: string
+                addresses:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                      city:
+                        type: string
+                      zip:
+                        type: string
+                      country:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                          - HQ
+                          - Office
+                    required:
+                      - address
+                      - city
+                      - zip
+                      - country
+                      - type
+                phone_numbers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      phone_type:
+                        type: string
+                        enum:
+                          - Cell
+                          - Office
+                          - Home
+                      phone_number:
+                        type: string
+                    required:
+                      - phone_type
+                      - phone_number
+                website:
+                  type: string
+              required:
+                - organization_name
+                - addresses
+                - phone_numbers
+        description: ''
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+    get:
+      summary: List all organizations
+      operationId: get-organizations
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Organization'
+                  total:
+                    type: integer
+                    minimum: 0
+                  skip:
+                    type: integer
+                    minimum: 0
+                  limit:
+                    type: integer
+                    minimum: 12
+                required:
+                  - total
+                  - skip
+                  - limit
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '500':
+          description: Internal Server Error
+      tags:
+        - Module_Organization
+        - ViewType_List
+        - Access_SuperUser
+      description: |-
+        List all the organizations
+
+        As a super user, I want to be able to see all of the organizations that exist on the Cloug Ag platform, so I can better manage our customers
+
+        As a super user, has a delete button
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: integer
+            default: 0
+            minimum: 0
+          in: query
+          name: skip
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+        - schema:
+            type: integer
+            default: 12
+            minimum: 12
+          in: query
+          name: limit
+        - schema:
+            type: string
+          in: query
+          name: organization_name
+        - schema:
+            type: string
+            enum:
+              - organization_name
+              - '-organization_name'
+            default: organization_name
+          in: query
+          name: sort
+  '/organizations/{organization_id}':
+    parameters:
+      - schema:
+          type: integer
+          minimum: 1
+        name: organization_id
+        in: path
+        required: true
+    get:
+      summary: Get organization
+      tags:
+        - Module_Organization
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/Organization'
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id
+      description: |-
+        Get organization details (get organization profile)
+
+        As a primary user, I want to see the details for my organization, so that I can properly manage the information associated with my organization
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+    put:
+      summary: Update organization
+      operationId: put-organizations-organization_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    properties:
+                      organization_id:
+                        type: integer
+                        minimum: 1
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      security:
+        - Cognito: []
+      description: |-
+        Update organization details (organization profile update)
+
+        As a primary user, I want to update the details for my organization, so that I can keep my organization information up to date
+      tags:
+        - Module_Organization
+        - ViewType_Form
+        - Access_SuperUser
+        - Access_PrimaryUser
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_name:
+                  type: string
+                addresses:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      address:
+                        type: string
+                      city:
+                        type: string
+                      zip:
+                        type: string
+                      country:
+                        type: string
+                      type:
+                        type: string
+                        enum:
+                          - HQ
+                          - Office
+                phone_numbers:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      phone_type:
+                        type: string
+                        enum:
+                          - Cell
+                          - Office
+                          - Home
+                      phone_number:
+                        type: string
+                website:
+                  type: string
+    delete:
+      summary: Delete organization
+      operationId: delete-organizations-organization_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - organization_id
+                    properties:
+                      organization_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      security:
+        - Cognito: []
+      description: |-
+        Delete organization will soft delete organization
+
+        As a primary user, I want to delete my organization from the Cloud Ag customer platform, so that I can remove my organization and associated information from the Cloud Ag platform
+
+        As a super user or a primary user, has delete button at bottom
+      tags:
+        - Module_Organization
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+  /users:
+    get:
+      summary: List all users
+      tags:
+        - Module_User
+        - ViewType_List
+        - Access_SuperUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  skip:
+                    type: integer
+                    minimum: 0
+                  total:
+                    type: integer
+                    minimum: 0
+                  limit:
+                    type: integer
+                    minimum: 12
+                required:
+                  - message
+                  - result
+                  - skip
+                  - total
+                  - limit
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-users
+      description: |-
+        List all users on the Cloud Agronomics platform
+
+        As a super user, I want to see all users on the Cloud Agronomics platform
+
+        As a super user, has delete button
+
+        Needs support for pagination, filtering w/ organization_id, sorting with organization_id
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+        - schema:
+            type: integer
+            minimum: 0
+            default: 0
+          in: query
+          name: skip
+        - schema:
+            type: integer
+            minimum: 12
+            default: 12
+          in: query
+          name: limit
+        - schema:
+            type: string
+          in: query
+          name: organization_id
+        - schema:
+            type: string
+            enum:
+              - organization_id
+              - '-organization_id'
+          in: query
+          name: sort
+  '/organizations/{organization_id}/users':
+    parameters:
+      - schema:
+          type: integer
+          minimum: 1
+        name: organization_id
+        in: path
+        required: true
+    get:
+      summary: List all users in a specific organization
+      tags:
+        - Module_User
+        - ViewType_List
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  total:
+                    type: integer
+                    minimum: 0
+                  skip:
+                    type: integer
+                    minimum: 0
+                  limit:
+                    type: integer
+                    minimum: 12
+                required:
+                  - message
+                  - result
+                  - total
+                  - skip
+                  - limit
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-users
+      description: |-
+        List all the users in this specific organization
+
+        As a user, I want to see all the users on the Cloud Agronomics platform with the ability to filter by organization, so that I can find any user on our platform at anytime
+
+        As a super user or a primary user, has delete button
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+        - schema:
+            type: integer
+            minimum: 0
+            default: 0
+          in: query
+          name: skip
+        - schema:
+            type: integer
+            minimum: 12
+            default: 12
+          in: query
+          name: limit
+        - schema:
+            type: string
+          in: query
+          name: first_name
+        - schema:
+            type: string
+          in: query
+          name: last_name
+        - schema:
+            type: string
+          in: query
+          name: email
+        - schema:
+            type: string
+          in: query
+          name: phone_number
+        - schema:
+            type: string
+            enum:
+              - first_name
+              - '-first_name'
+              - last_name
+              - '-last_name'
+              - email
+              - '-email'
+              - phone_number
+              - '-phone_number'
+          in: query
+          name: sort
+    post:
+      summary: Create user in a specific organization
+      operationId: post-organizations-organization_id-users
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - user_id
+                    properties:
+                      user_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_User
+        - ViewType_Form
+        - Access_User
+        - Access_PrimaryUser
+      description: |-
+        Create new user
+
+        As a user, I want to create a new user for myself, or another user in my organization, so that each of my colleagues can have their own profile and create growers, fields, etc from their own user account
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                email:
+                  type: string
+                  format: email
+                'phone_numbers ':
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Phone'
+              required:
+                - first_name
+                - last_name
+                - email
+  '/organizations/{organization_id}/users/{user_id}':
+    parameters:
+      - schema:
+          type: string
+        name: organization_id
+        in: path
+        required: true
+      - schema:
+          type: integer
+          minimum: 1
+        name: user_id
+        in: path
+        required: true
+    get:
+      summary: Get user in a specific organization
+      tags:
+        - Module_User
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-users-user_id-me
+      description: |
+        Get user details
+
+        Primary Users can see other users details, but users cannot see other users information that is not their own
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+    put:
+      summary: Update user in a specific organization
+      operationId: put-organizations-organization_id-users-user_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - user_id
+                    properties:
+                      user_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_User
+        - ViewType_Form
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      description: |-
+        Update user details (user profile page)
+
+        Primary Users can see other users details, but users cannot see other users information that is not their own
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                phone_numbers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Phone'
+        description: ''
+    delete:
+      summary: Delete user in a specific organization
+      operationId: delete-organizations-organization_id-users-user_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - user_id
+                    properties:
+                      user_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_User
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      description: |-
+        Delete user will soft delete the user and hard delete after 6 months if no action is taken
+
+        As a primary user, I want to delete a user from my organization, so that I can make sure only specific users have access to my organization
+
+        As a super user or a primary user, has delete button at bottom
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+  '/organizations/{organization_id}/users/me':
+    parameters:
+      - schema:
+          type: string
+        name: organization_id
+        in: path
+        required: true
+    get:
+      summary: Get login user in a specific organization
+      tags:
+        - Module_User
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/User'
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-users-me
+      description: |-
+        Get user details
+
+        As a user with `/me`, I want to see my information, so that I can make sure my information is accurate
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+    put:
+      summary: Update login user in a specific organization
+      operationId: put-organizations-organization_id-users-me
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - user_id
+                    properties:
+                      user_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_User
+        - ViewType_Form
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      description: |-
+        Update user details (user profile page)
+
+        As a user with `/me`, I want to update my information, so that I can update my information if anything has changed
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                phone_numbers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Phone'
+    delete:
+      summary: Delete login user in a specific organization
+      operationId: delete-organizations-organization_id-users-me
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - user_id
+                    properties:
+                      user_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_User
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      description: |-
+        Delete user will soft delete the user and hard delete after 6 months if no action is taken
+
+        As a primary user, I want to delete a user from my organization, so that I can make sure only specific users have access to my organization
+
+        As a super user or a primary user, has delete button at bottom
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+  /growers:
+    get:
+      summary: List all growers
+      tags:
+        - Module_Grower
+        - ViewType_List
+        - Access_SuperUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Grower'
+                  skip:
+                    type: integer
+                    minimum: 0
+                  total:
+                    type: integer
+                    minimum: 0
+                  limit:
+                    type: integer
+                    minimum: 12
+                required:
+                  - message
+                  - result
+                  - skip
+                  - total
+                  - limit
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-growers
+      description: |-
+        Get all growers on the Cloud Agronomics platform
+
+        As a super user, I want to see all of the growers on the Cloud Agronomics platform, so that I can see any grower on our platform
+
+        For super user, has a delete button
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+        - schema:
+            type: integer
+            minimum: 0
+            default: 0
+          in: query
+          name: skip
+        - schema:
+            type: integer
+            minimum: 12
+            default: 12
+          in: query
+          name: limit
+        - schema:
+            type: string
+          in: query
+          name: grower_id
+        - schema:
+            type: string
+            enum:
+              - grower_id
+              - '-grower_id'
+          in: query
+          name: sort
+  '/organizations/{organization_id}/growers':
+    parameters:
+      - schema:
+          type: integer
+          minimum: 1
+        name: organization_id
+        in: path
+        required: true
+    get:
+      summary: List growers in a specific organization
+      tags:
+        - Module_Grower
+        - ViewType_List
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Grower'
+                  total:
+                    type: integer
+                    minimum: 0
+                  skip:
+                    type: integer
+                    minimum: 0
+                  limit:
+                    type: integer
+                    minimum: 12
+                required:
+                  - message
+                  - result
+                  - total
+                  - skip
+                  - limit
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-growers
+      description: |-
+        Get all growers in my organization (grower list page)
+
+        As a user, I want to see all of the growers in my organization, so that I can see all of the growers that I currently manage
+
+        For all user types, has a delete button
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+        - schema:
+            type: integer
+            minimum: 0
+            default: 0
+          in: query
+          name: skip
+        - schema:
+            type: integer
+            minimum: 12
+            default: 12
+          in: query
+          name: limit
+        - schema:
+            type: string
+          in: query
+          name: grower_name
+        - schema:
+            type: string
+          in: query
+          name: field_name
+        - schema:
+            type: string
+            enum:
+              - grower_name
+              - '-grower_name'
+              - field_name
+              - '-field_name'
+          in: query
+          name: sort
+    post:
+      summary: Create grower in a specific organization
+      operationId: post-organizations-organization_id-growers
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - grower_id
+                    properties:
+                      grower_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_Grower
+        - ViewType_Form
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        Create a new grower within an organization
+
+        As a user, I want to create a grower and add that grower to my organization so that I can see all of my growers in the Cloud Agronomics platform
+
+        All users within the organization associated with this grower have permission to create.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_id:
+                  type: integer
+                  minimum: 1
+                grower_name:
+                  type: string
+                addresses:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Address'
+                phone_numbers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Phone'
+              required:
+                - organization_id
+                - grower_name
+                - addresses
+  '/organizations/{organization_id}/growers/{grower_id}':
+    parameters:
+      - schema:
+          type: integer
+          minimum: 1
+        name: organization_id
+        in: path
+        required: true
+      - schema:
+          type: integer
+          minimum: 1
+        name: grower_id
+        in: path
+        required: true
+    get:
+      summary: List grower in a specific organization
+      tags:
+        - Module_Grower
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    $ref: '#/components/schemas/Grower'
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-growers-grower_id
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        List an individual grower associated with this organization (grower profile page)
+
+        As a user, I want to see an individual grower's information already in my organization so that I can review their information
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+    put:
+      summary: Update grower in a specific organization
+      operationId: put-organizations-organization_id-growers-grower_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - grower_id
+                    properties:
+                      grower_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_Grower
+        - ViewType_Form
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        Update a grower's information (grower profile page)
+
+        As a user, I want to update a grower's information already in my organization so that I can keep my serviced growers up to date in the Cloud Agronomics platform
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grower_name:
+                  type: string
+                addresses:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Address'
+                phone_numbers:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Phone'
+                fields:
+                  type: array
+                  items:
+                    type: integer
+                    minimum: 1
+    delete:
+      summary: Delete grower in a specific organization
+      operationId: delete-organizations-organization_id-growers-grower_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - grower_id
+                    properties:
+                      grower_id:
+                        type: integer
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      tags:
+        - Module_Grower
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        Delete grower will soft delete the grower and hard delete after 6 months if no action is taken
+
+        As a user, I want to delete a grower already in my organization so that I can accurately account for which growers my organization actively manages
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+  '/organizations/{organization_id}/fields':
+    parameters:
+      - schema:
+          type: integer
+          minimum: 1
+        name: organization_id
+        in: path
+        required: true
+    get:
+      summary: List organization fields in a specific organization
+      tags:
+        - Module_Field
+        - ViewType_List
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Field'
+                  total:
+                    type: integer
+                    minimum: 0
+                  skip:
+                    type: integer
+                    minimum: 0
+                  limit:
+                    type: integer
+                    minimum: 12
+                required:
+                  - message
+                  - result
+                  - total
+                  - skip
+                  - limit
+            application/xml:
+              schema:
+                type: object
+                properties: {}
+            multipart/form-data:
+              schema:
+                type: object
+                properties: {}
+            text/html:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-fields
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+        - schema:
+            type: integer
+            minimum: 0
+            default: 0
+          in: query
+          name: skip
+        - schema:
+            type: integer
+            minimum: 12
+            default: 12
+          in: query
+          name: limit
+        - schema:
+            type: string
+          in: query
+          name: field_name
+        - schema:
+            type: integer
+            minimum: 1
+          in: query
+          name: grower_id
+        - schema:
+            type: string
+          in: query
+          name: crop_type
+        - schema:
+            type: integer
+            minimum: 2020
+          in: query
+          name: year
+        - schema:
+            type: string
+          in: query
+          name: season
+        - schema:
+            type: string
+            enum:
+              - field_name
+              - '-field_name'
+              - grower_id
+              - '-grower_id'
+              - crop_type
+              - '-crop_type'
+              - year
+              - '-year'
+              - season
+              - '-season'
+          in: query
+          name: sort
+      description: |-
+        List all the field details for an organization
+
+        As a user, I want to see all of the fields associated with my entire organization, so that I can easily see and manage all of my my fields at one time
+
+        As a user, I want to assign multiple fields to the same grower so that I can store all of my growers’ field's information on the Cloud Agronomics platform
+
+        As a user, I want to see all the fields associated with any grower I advise so that I can easily see and manage that grower's fields
+
+        For all user types, has a delete button and a Add Grower button
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+    post:
+      summary: Create Field(s) in a specific organization
+      operationId: post-organizations-organization_id-fields
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - field_id
+                    properties:
+                      field_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      tags:
+        - Module_Field
+        - ViewType_Form
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        Given a JSON object (formatted as GeoJSON, we will provide examples), create a new field for an individual grower.
+
+        As a user, I want to add a crop field (or multiple crop fields simultaneously) that I manage (with the option to associate a given field with a specific grower), so that I can manage those fields and see my analytics layers on the Coud Agronomics platform
+
+        As a user, I want to upload a Shapefile to Cloud Agronomics’ platform containing one or more of my fields, so that I can visually see the geographic area my fields cover and ensure they are correct.
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                organization_id:
+                  type: integer
+                  minimum: 1
+                geometry:
+                  type: array
+                  items: {}
+                field_name:
+                  type: string
+                grower_id:
+                  type: integer
+                  minimum: 1
+                crop_type:
+                  type: string
+                year:
+                  type: integer
+                season:
+                  type: string
+                description:
+                  type: string
+              required:
+                - organization_id
+                - geometry
+                - field_name
+  '/organizations/{organization_id}/fields/{field_id}':
+    parameters:
+      - schema:
+          type: integer
+          minimum: 1
+        name: organization_id
+        in: path
+        required: true
+      - schema:
+          type: integer
+          minimum: 1
+        name: field_id
+        in: path
+        required: true
+    get:
+      summary: Get field in a specific organization
+      tags:
+        - Module_Field
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  field:
+                    $ref: '#/components/schemas/Field'
+                required:
+                  - message
+                  - field
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-fields-field_id
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        Get an individual field's details (field meta information) and see an overview of the field with the option to toggle filters for the field
+
+        As a user, I want to see the meta information of an individual field (for any of my growers) as well as a view of the field on the map with the option to toggle filters, so that I can visualize each crop field and its details and best manage that field for my grower on the Cloud Agronomics platform
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+    put:
+      summary: Update field in a specific organization
+      operationId: put-organizations-organization_id-fields-field_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - field_id
+                    properties:
+                      field_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      tags:
+        - Module_Field
+        - ViewType_Form
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        Update the details for an individual field
+
+        As a user, I want to update the meta information for an individual crop field, so that I can keep that field's information up to date
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                field_name:
+                  type: string
+                geometry:
+                  type: array
+                  items: {}
+                grower_id:
+                  type: integer
+                crop_type:
+                  type: string
+                year:
+                  type: integer
+                  minimum: 2020
+                season:
+                  type: string
+                description:
+                  type: string
+    delete:
+      summary: Delete field in a specific organization
+      operationId: delete-organizations-organization_id-fields-field_id
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: object
+                    required:
+                      - field_id
+                    properties:
+                      field_id:
+                        type: integer
+                        minimum: 1
+                required:
+                  - message
+                  - result
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+      tags:
+        - Module_Field
+        - ViewType_Single
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+      description: |-
+        Delete a field
+
+        As a user, I want to delete a field associated with a grower, so that I can make sure that all of the crop fields I manage for my growers are accurate
+
+        For all user types, has a delete button
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+  /fields:
+    get:
+      summary: List all fields
+      tags:
+        - Module_Field
+        - ViewType_List
+        - Access_SuperUser
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Field'
+                  total:
+                    type: integer
+                    minimum: 0
+                  skip:
+                    type: integer
+                    minimum: 0
+                  limit:
+                    type: integer
+                    minimum: 12
+                required:
+                  - message
+                  - result
+                  - total
+                  - skip
+                  - limit
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-fields
+      description: |-
+        List all fields on the Cloud Agronomics platform
+
+        As a super user, I want to see all of the fields on the Cloud Agronomics platform, so that I can easily find any field(s) I may want
+
+        For a super user, has a delete button and a Add Grower button
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+        - schema:
+            type: string
+          in: query
+          name: field_name
+        - schema:
+            type: integer
+            minimum: 1
+          in: query
+          name: field_id
+        - schema:
+            type: integer
+            minimum: 1
+          in: query
+          name: grower_id
+        - schema:
+            type: string
+          in: query
+          name: crop_type
+        - schema:
+            type: string
+          in: query
+          name: year
+        - schema:
+            type: string
+          in: query
+          name: season
+        - schema:
+            type: string
+            enum:
+              - field_name
+              - '-field_name'
+              - field_id
+              - '-field_id'
+              - grower_id
+              - '-grower_id'
+              - crop_type
+              - '-crop_type'
+              - year
+              - '-year'
+              - season
+              - '-season'
+            default: field_name
+          in: query
+          name: sort
+        - schema:
+            type: integer
+            default: 12
+            minimum: 12
+          in: query
+          name: limit
+        - schema:
+            type: integer
+            minimum: 0
+            default: 0
+          in: query
+          name: skip
+      security:
+        - Cognito: []
+  '/organizations/{organization_id}/fields/{field_id}/assets':
+    parameters:
+      - schema:
+          type: integer
+        name: organization_id
+        in: path
+        required: true
+      - schema:
+          type: integer
+        name: field_id
+        in: path
+        required: true
+    get:
+      summary: Get Assets
+      tags:
+        - Module_Assets
+        - ViewType_Map
+        - Access_SuperUser
+        - Access_PrimaryUser
+        - Access_User
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Asset'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_400'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_401'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_403'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_404'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse_500'
+      operationId: get-organizations-organization_id-fields-field_id-assets
+      description: |-
+        Get filters list of SVG images
+
+        All users within the organization associated with this grower. Users outside of this organization cannot get information associated with this grower.
+      security:
+        - Cognito: []
+      parameters:
+        - schema:
+            type: string
+            default: application/json
+          in: header
+          name: Content-Type
+          required: true
+components:
+  schemas:
+    ApiResponse_500:
+      title: ApiResponse_500
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ApiResponse_401:
+      title: ApiResponse_401
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ApiResponse_400:
+      title: ApiResponse_400
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    ApiResponse_403:
+      title: ApiResponse_403
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Organization:
+      title: Organization
+      type: object
+      properties:
+        organization_id:
+          type: integer
+          minimum: 1
+        organization_name:
+          type: string
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+        phone_numbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Phone'
+      required:
+        - organization_id
+        - organization_name
+        - addresses
+    Field:
+      title: Field
+      type: object
+      description: ''
+      properties:
+        field_id:
+          type: integer
+          minimum: 1
+        field_name:
+          type: string
+        organization_id:
+          type: integer
+          minimum: 1
+        geometry:
+          type: array
+          items:
+            type: object
+      required:
+        - field_id
+        - field_name
+        - organization_id
+    Grower:
+      title: Grower
+      type: object
+      description: ''
+      properties:
+        grower_id:
+          type: integer
+          minimum: 1
+        organization_id:
+          type: integer
+          minimum: 1
+        grower_name:
+          type: string
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+      required:
+        - grower_id
+        - organization_id
+        - grower_name
+        - addresses
+    ApiResponse_404:
+      title: ApiResponse_404
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+      required:
+        - code
+        - message
+    Asset:
+      title: Asset
+      type: object
+      properties:
+        asset_id:
+          type: integer
+          minimum: 1
+      required:
+        - asset_id
+    User:
+      title: User
+      type: object
+      description: ''
+      properties:
+        user_id:
+          type: integer
+          minimum: 1
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone_numbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/Phone'
+      required:
+        - user_id
+        - first_name
+        - last_name
+        - email
+        - phone_numbers
+    Address:
+      title: Address
+      type: object
+      properties:
+        address:
+          type: string
+        city:
+          type: string
+        zip:
+          type: string
+        country:
+          type: string
+        type:
+          type: string
+          enum:
+            - HQ
+            - Office
+            - Home
+      required:
+        - address
+        - city
+        - zip
+        - country
+        - type
+    Phone:
+      title: Phones
+      type: object
+      properties:
+        phone_type:
+          type: string
+          enum:
+            - Cell
+            - Office
+            - Home
+        phone_number:
+          type: string
+      required:
+        - phone_type
+        - phone_number
+  securitySchemes:
+    Cognito:
+      type: http
+      scheme: oauth
+tags:
+  - name: Module_Organization
+  - name: ViewType_Form
+  - name: Access_SuperUser
+  - name: ViewType_List
+  - name: Module_User
+  - name: Module_Grower
+  - name: Module_Field
+  - name: Module_Assets
+  - name: Access_User
+  - name: Access_PrimaryUser
+  - name: ViewType_Single
+  - name: ViewType_Map
